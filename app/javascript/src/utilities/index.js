@@ -16,3 +16,12 @@ export const keyHandler = (options = {}) => e => {
         return fn();
     }
 }
+
+export const getCSRF = function() {
+  const element = document.querySelector('meta[name="csrf-token"]');
+  if (element) {
+    return element.getAttribute('content');
+  } else {
+    return '';
+  }
+}

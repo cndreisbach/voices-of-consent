@@ -33,7 +33,7 @@ Rails.application.routes.draw do
   get  'box_design/:box_id',                       to: 'box_design#new',                 as: "box_design_new"
   get  'box_design/:box_id/claim',                 to: 'box_design#claim',               as: 'box_design_claim'
   get  'box_design/:box_id/decline',               to: "box_design#decline",             as: 'box_design_decline'
-  get  'box_design/:box_id/complete',              to: 'box_design#complete',            as: 'box_design_complete'
+  post 'box_design/:box_id/complete',              to: 'box_design#complete',            as: 'box_design_complete'
 
   get  'box_research/:box_id',                     to: 'box_research#new',               as: "box_research_new"
   get  'box_research/:box_id/claim',               to: 'box_research#claim',             as: 'box_research_claim'

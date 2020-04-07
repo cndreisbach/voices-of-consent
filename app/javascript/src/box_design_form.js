@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom'
 import BoxDesignForm from 'components/box-design-form'
 
 const App = () => (
-  <BoxDesignForm />
+  <BoxDesignForm boxId={window.boxId} />
 )
 
 

@@ -5,6 +5,7 @@ class AutoEmailHandler
     @recipient_type = recipient_type
     @object = object
     @object_aasm_status = object.aasm_state
+    @object_new_aasm_status = object.aasm.to_state
     @current_user = current_user
     @mailer_klass = nil
     @mailer_action = nil
@@ -46,12 +47,16 @@ class AutoEmailHandler
     elsif @object_aasm_status == "reviewed"
       @mailer_action = "design_solicitation_email"
       @permission = Permission::BOX_DESIGNER
+    # TODO why is this not catching?????
+    elsif @object_new_aasm_status == "researched"
+      @mailer_action = "assembly_solicitation_email"
+      @permission = Permission::BOX_ASSEMBLER      
     elsif @object_aasm_status == "designed" && @object.requires_research? && @object.research_completed?
       @mailer_action = "assembly_solicitation_email"
       @permission = Permission::BOX_ASSEMBLER
     elsif @object_aasm_status == "designed" && @object.requires_research? && !@object.research_completed?
       @mailer_action = "research_solicitation_email"
-      @permission = Permission::BOX_ITEM_RESEARCHER
+      @permission = Permission::BOX_ITEM_RESEARCHER    
     elsif @object_aasm_status == "assembled"
       @mailer_action = "shipping_solicitation_email"
       @permission = Permission::BOX_SHIPPER
@@ -62,7 +67,7 @@ class AutoEmailHandler
       @mailer_action = "shipping_confirmation_email"
       @permission = nil # n/a if going to requester
     else
-      raise "ERROR -- unknown aasm state"
+      raise "ERROR -- unknown aasm state.; @object_new_aasm_status: '#{@object_new_aasm_status}'"
     end
   end
 

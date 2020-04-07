@@ -2,9 +2,10 @@ import React , { useState, useEffect } from 'react'
 import ItemPicker from '../item-picker'
 import './BoxDesignForm.scss'
 import CreatableSelect from 'react-select/creatable'
+import { getCSRF } from '../../utilities'
 
 
-const BoxDesign = () => {
+const BoxDesign = ({boxId}) => {
   const [allItems, updateAllItems] = useState([])
   const [items, updateItems] = useState([])
   const [searchInput, updateSearchInput] = useState("")
@@ -17,7 +18,7 @@ const BoxDesign = () => {
       .then((data) => {
         const allTypes = data.map(({ name }) => name)
         const selectTypes = data.map((type) => {
-          return { value: type.name, label: type.name }
+          return { value: type.name, label: type.name, id: type.id }
         })
         updateAllItems(allTypes)
         updateSelectableItems(selectTypes)
@@ -48,8 +49,30 @@ const BoxDesign = () => {
   }
 
   const addItem = (item) => {
-    const updatedItems = [ ...items, { item, count: 1 }]
+    const updatedItems = [ ...items, { ...item, count: 1 }]
     updateItems(updatedItems)
+  }
+
+  const completeDesign = () => {
+    fetch(`/box_design/${boxId}/complete`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': getCSRF(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        'box_item_attributes': items.map(item => {
+          return {quantity: item.count, inventory_type_id: item.id}
+        })
+      })
+    })
+    .then(response => response.json())
+    .then(responseData => {
+      console.log(responseData)
+    })
   }
 
   return (
@@ -66,7 +89,7 @@ const BoxDesign = () => {
             isClearable
             onChange = { e => {
               updateSearchInput('')
-              addItem(e.value)
+              addItem(e)
               const reducedSelectableItems = selectableItems.filter(itemType =>
                 itemType.value != e.value
               );
@@ -80,10 +103,11 @@ const BoxDesign = () => {
               ? 
                 <div className="box-design__item-picker">
                   {
-                    items.map(({ item, count }, index) => {
+                    items.map(({ id, value, count }, index) => {
                       return <ItemPicker 
                         key={ index }
-                        name={ item } 
+                        itemId={ id }
+                        name={ value } 
                         count={ count } 
                         updateCount={ updateItemCount(index) }
                         removeItem={ () => removeItem(index) }
@@ -117,6 +141,7 @@ const BoxDesign = () => {
           disabled={ !items.length }
             onClick={() => {
               console.log(items)
+              completeDesign()
             }}
         >{ !items.length ? 'Waiting' : 'The box is ready to go' }</button>
       </section>
